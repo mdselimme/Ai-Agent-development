@@ -47,4 +47,11 @@ while True:
         }
     )
 
-    
+
+    print("\n========== Conversation History ==========")
+
+    for message in messages:
+        print(f"{message['role'].title()} : {message['content']}")
+
+    print("==========================================")
+
