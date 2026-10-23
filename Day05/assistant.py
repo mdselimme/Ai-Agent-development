@@ -138,8 +138,66 @@ while True:
         print(response.choices[0].message.content)
         continue
 
-   
-      
+
+    
+    if text.startswith("ask"):
+        parts = user_input.split(maxsplit=2)
+        #print(parts)
+        filename = parts[1]
+        question = parts[2]
+
+        file_content = read_text_file(
+        "data/" + filename
+        )
+
+        prompt = f"""
+You are given a document.
+
+Answer the user's question using
+only the information present
+in the document.
+
+If the answer is not available,
+say:
+'I couldn't find that information
+in the document.'
+
+Document:
+
+{file_content}
+
+Question:
+
+{question}
+"""
+
+
+
+        response = client.chat.completions.create(
+
+        model=os.getenv("MODEL"),
+
+        messages=[
+
+        {
+            "role":"system",
+            "content":"You are a helpful assistant."
+        },
+
+        {
+            "role":"user",
+            "content":prompt
+        }
+
+        ]
+
+        )
+
+        print(response.choices[0].message.content)
+        continue
+
+
+    
 
     tool_result = execute_tool(user_input)
 
