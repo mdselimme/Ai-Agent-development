@@ -83,6 +83,45 @@ User Request
 
     return tool_name.strip()
 
+def generate_response(user_request, tool_result):
+
+    prompt = f"""
+The user asked:
+
+{user_request}
+
+The tool returned:
+
+{tool_result}
+
+Respond directly to the user in a natural, conversational way.
+
+Use the tool result as the factual source.
+Transform raw tool output into a human-friendly answer.
+Do not simply copy raw values when a natural sentence would be better.
+Do not add information that is not needed to answer the request.
+Do not mention tools, internal processing, planning, or reasoning.
+Keep the response concise.
+"""
+
+    response = client.chat.completions.create (
+
+        model=os.getenv("MODEL"),
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt
+            }
+
+        ]
+
+    )
+
+    return response.choices[0].message.content
+
+
 
 async def main():
 # Step 1: Connect to the MCP Server.
@@ -117,6 +156,17 @@ async def main():
         "Planner Selected:",
         tool_name
     )
+
+# Step 5.	Execute the selected tool.
+    tool_result = await execute_tool(client, tool_name)
+# Step 6. Generate a natural language response.
+
+    final_answer = generate_response(user_request, tool_result)
+
+    print()
+
+    print(final_answer)
+
 
 
     await disconnect(
