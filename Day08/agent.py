@@ -20,6 +20,68 @@ from mcp_client import (
     execute_tool
 )
 
+# Build Tool Descriptions
+def build_tool_descriptions(tools):
+
+    descriptions = ""
+    for tool in tools:
+        descriptions += f"""
+Tool:
+{tool.name}
+
+Description:
+{tool.description}
+----------------------------
+"""
+
+    return descriptions
+
+
+def planner(user_request, tools):
+
+    tool_descriptions = build_tool_descriptions(
+        tools
+    )
+
+    ###Then create a prompt by combining user input and Tool Description.  and Give this prompt to Ollama. ###
+
+    prompt = f"""
+You are an AI Planner.
+
+Available Tools
+
+{tool_descriptions}
+
+Instructions
+
+1. Select the best tool.
+2. Reply ONLY with the tool name.
+3. Do not explain.
+
+User Request
+
+{user_request}
+"""
+# Give this prompt to ollama
+    response = client.chat.completions.create (
+
+        model= os.getenv("MODEL"),
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt
+            }
+
+        ]
+
+    )
+
+#Ollama returns the tool name
+    tool_name = response.choices[0].message.content
+
+    return tool_name.strip()
 
 
 async def main():
@@ -38,7 +100,25 @@ async def main():
         print(tool.name)
     print() 
 
-    
+    ### Step 3: Planner: Take the User Input (Question). Create Tool Descriptions for each tool. Then create a prompt by combining user input and Tool Description.  and Give this prompt to Ollama. ###
+
+    user_request = input(
+        "User : "
+    )
+
+    tool_name = planner(
+        user_request,
+        tools
+    )
+
+    print()
+
+    print(
+        "Planner Selected:",
+        tool_name
+    )
+
+
     await disconnect(
         client
     )
